@@ -1,0 +1,17 @@
+services:
+  # The Game Terminal (ttyd)
+  game:
+    image: ghcr.io/mausemarc/m169-docker/nightatcasino:v1
+    ports:
+      - "7681:7681"
+    restart: unless-stopped
+
+  # The Frontend Website
+  website:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./html:/usr/share/nginx/html
+    depends_on:
+      - game
