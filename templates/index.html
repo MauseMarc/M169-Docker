@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>SBUMLI-M143-Backup</title></head>
+<body>
+    <h1>Maus of Roadstreet - M143 DEMO</h1>
+
+    <form action="/add" method="POST">
+        <input type="text" name="content" placeholder="Enter text here" required>
+        <button type="submit">Add Entry</button>
+    </form>
+
+    <ul>
+        {% for entry in entries %}
+        <li>
+            <strong>{{ entry[1] }}</strong> <small>({{ entry[2] }})</small>
+            <a href="/delete/{{ entry[0] }}">Delete</a>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
