@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: website-html-config
+data:
+  index.html: |
+    k
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Night At Casino</title>
+        <style>
+            body { background: #1a1a1a; color: white; font-family: sans-serif; text-align: center; }
+            .container { margin-top: 50px; }
+            .terminal-window {
+                border: 10px solid #333;
+                border-radius: 10px;
+                display: inline-block;
+                box-shadow: 0 0 20px rgba(0,255,0,0.2);
+                background: black;
+            }
+            iframe { border: none; background: black; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>MARC'S TERMINAL GAME</h1>
+            <p>Type your commands below to play!</p>
+            
+            <div class="terminal-window">
+                <iframe src="http://localhost:7681" width="800" height="500"></iframe>
+            </div>
+    
+            <div style="margin-top: 20px;">
+                <img src="https://via.placeholder.com/150" alt="Game Logo">
+            </div>
+        </div>
+    </body>
+    </html>
