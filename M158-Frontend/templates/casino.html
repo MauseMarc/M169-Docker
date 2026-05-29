@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Casino Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111418;
+    --border: #1e2530;
+    --accent: #c9a84c;
+    --accent2: #e8c97a;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --text: #d4cfc7;
+    --muted: #5a6070;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .nav-strip { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .nav-link { font-family: var(--display); font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 9px 14px; border-bottom: 2px solid transparent; transition: all .15s; }
+  .nav-link:hover { color: var(--text); border-bottom-color: rgba(201,168,76,.4); }
+  .nav-link.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+  }
+
+  .logo-diamond {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  header .subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+
+  .main {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* LEFT PANEL */
+  .left-panel {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-label {
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 16px 24px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* EXCHANGE FORM */
+  .exchange-form {
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.1em;
+    color: var(--accent2);
+    text-transform: uppercase;
+  }
+
+  label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  select, input[type="text"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  select:focus, input[type="text"]:focus {
+    border-color: var(--accent);
+  }
+
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .btn {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 13px 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .btn:hover::after { opacity: 0.08; }
+  .btn:active::after { opacity: 0.16; }
+
+  .btn-green {
+    background: #1a3a28;
+    color: var(--green);
+    border: 1px solid #2a5a3a;
+  }
+
+  .btn-red {
+    background: #3a1a1a;
+    color: var(--red);
+    border: 1px solid #5a2a2a;
+  }
+
+  /* RESPONSE BANNER — fixed-height slot so nothing shifts */
+  .banner-slot { height: 68px; padding: 8px 24px; flex-shrink: 0; }
+  .response-banner {
+    height: 100%;
+    display: none;
+    border-radius: 2px;
+    padding: 0 18px;
+    gap: 12px;
+    align-items: center;
+    border-left: 4px solid;
+    animation: bannerIn 0.2s ease;
+  }
+  .response-banner.show { display: flex; }
+  .response-banner.success {
+    border-color: var(--green);
+    background: #0e2a1a;
+    box-shadow: 0 0 24px rgba(46,204,113,0.12);
+  }
+  .response-banner.error {
+    border-color: var(--red);
+    background: #2a0e0e;
+    box-shadow: 0 0 24px rgba(231,76,60,0.12);
+  }
+  .banner-icon {
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .banner-body { display: flex; flex-direction: column; gap: 3px; }
+  .banner-status {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .banner-msg {
+    font-size: 13px;
+    line-height: 1.4;
+    opacity: 0.9;
+  }
+  .response-banner.success .banner-status,
+  .response-banner.success .banner-icon { color: var(--green); }
+  .response-banner.success .banner-msg { color: #a8e8c0; }
+  .response-banner.error .banner-status,
+  .response-banner.error .banner-icon { color: var(--red); }
+  .response-banner.error .banner-msg { color: #e8a8a0; }
+
+  @keyframes bannerIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  /* COMPANY BALANCES */
+  .balances-section {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .company-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 24px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .company-row:hover { background: rgba(201,168,76,0.04); }
+
+  .company-name {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+
+  .company-balance {
+    font-size: 14px;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* RIGHT PANEL - LOG */
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .log-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .log-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 16px;
+    padding: 10px 24px;
+    border-bottom: 1px solid #12161c;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .log-row:hover { background: rgba(255,255,255,0.02); }
+
+  .log-ts {
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .log-msg { color: var(--text); }
+
+  .empty-state {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  .refresh-bar {
+    padding: 12px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+  }
+
+  .refresh-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .last-updated {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  select option { background: #111418; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-diamond"></div>
+  <h1>Casino Terminal</h1>
+  <span class="subtitle">Chip Exchange System</span>
+</header>
+
+<nav class="nav-strip">
+  <a href="bar"    class="nav-link">Bar</a>
+  <a href="casino" class="nav-link active">Casino</a>
+  <a href="transfer" class="nav-link">Transfer</a>
+  <a href="stocks"  class="nav-link">Stocks</a>
+  <a href="loans"   class="nav-link">Loans</a>
+  <a href="voting"  class="nav-link">Voting</a>
+  <a href="events"  class="nav-link">Events</a>
+</nav>
+
+<div class="main">
+  <!-- LEFT: Form + Balances -->
+  <div class="left-panel">
+    <div class="panel-label">Exchange</div>
+
+    <div class="exchange-form">
+      <div class="form-title">Chip Exchange</div>
+
+      <div>
+        <label>Company</label>
+        <select id="company-select">
+          <option value="">— Select company —</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Amount</label>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" id="amount" placeholder="0" />
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="exchange('in')">▲ Cash → Chips</button>
+        <button class="btn btn-red" onclick="exchange('out')">▼ Chips → Cash</button>
+      </div>
+    </div>
+
+    <div class="banner-slot">
+      <div class="response-banner" id="toast">
+        <div class="banner-icon" id="banner-icon"></div>
+        <div class="banner-body">
+          <div class="banner-status" id="banner-status"></div>
+          <div class="banner-msg" id="banner-msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-label">Company Balances</div>
+    <div class="balances-section" id="balances">
+      <div class="empty-state">Loading…</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Log -->
+  <div class="right-panel">
+    <div class="panel-label">Transaction Log</div>
+    <div class="log-area" id="log-area">
+      <div class="empty-state">Loading…</div>
+    </div>
+    <div class="refresh-bar">
+      <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+      <span class="last-updated" id="last-updated"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE = `http://${window.location.hostname}:5000`;
+
+async function loadAll() {
+  await Promise.all([loadCompanies(), loadLog()]);
+  document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+async function loadCompanies() {
+  try {
+    const res = await fetch(`${BASE}/api/company/list`);
+    const data = await res.json();
+    renderBalances(data);
+    renderSelect(data);
+  } catch (e) {
+    document.getElementById('balances').innerHTML = '<div class="empty-state">Could not reach API</div>';
+  }
+}
+
+function renderSelect(companies) {
+  const sel = document.getElementById('company-select');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Select company —</option>';
+  companies.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  if (cur) sel.value = cur;
+}
+
+function renderBalances(companies) {
+  const el = document.getElementById('balances');
+  if (!companies.length) { el.innerHTML = '<div class="empty-state">No companies</div>'; return; }
+  el.innerHTML = companies.map(c => `
+    <div class="company-row">
+      <span class="company-name">${c.name}</span>
+      <span class="company-balance">${c.balance.toLocaleString()}</span>
+    </div>`).join('');
+}
+
+async function loadLog() {
+  try {
+    const res = await fetch(`${BASE}/api/log/casino`);
+    const data = await res.json();
+    const el = document.getElementById('log-area');
+    if (!data.length) { el.innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
+    el.innerHTML = [...data].reverse().map(row => `
+      <div class="log-row">
+        <span class="log-ts">${row.timestamp}</span>
+        <span class="log-msg">${row.msg}</span>
+      </div>`).join('');
+  } catch (e) {
+    document.getElementById('log-area').innerHTML = '<div class="empty-state">Could not reach API</div>';
+  }
+}
+
+async function exchange(direction) {
+  const company_id = parseInt(document.getElementById('company-select').value);
+  const amount = parseInt(document.getElementById('amount').value);
+
+  if (!company_id) { showToast('Select a company', 'error'); return; }
+  if (!amount || amount <= 0) { showToast('Enter a valid amount', 'error'); return; }
+
+  try {
+    const res = await fetch(`${BASE}/api/casino/exchange`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ direction, company_id, amount })
+    });
+    const data = await res.json();
+    showToast(data.msg, data.status);
+    if (data.status === 'success') {
+      document.getElementById('amount').value = '';
+      loadAll();
+    }
+  } catch (e) {
+    showToast('Could not reach API', 'error');
+  }
+}
+
+let toastTimer;
+function showToast(msg, type) {
+  const banner = document.getElementById('toast');
+  document.getElementById('banner-icon').textContent = type === 'success' ? '✓' : '✕';
+  document.getElementById('banner-status').textContent = type === 'success' ? 'Success' : 'Error';
+  document.getElementById('banner-msg').textContent = msg;
+  banner.className = `response-banner ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => banner.classList.remove('show'), 5000);
+}
+
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>

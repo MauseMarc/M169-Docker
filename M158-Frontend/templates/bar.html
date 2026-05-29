@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bar Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b0e;
+    --surface: #0e1216;
+    --surface2: #12171d;
+    --border: #1a2230;
+    --accent: #4a9eca;
+    --accent2: #7bbde0;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --amber: #e0a030;
+    --text: #c8d4e0;
+    --muted: #4a5868;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .nav-strip { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .nav-link { font-family: var(--display); font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 9px 14px; border-bottom: 2px solid transparent; transition: all .15s; }
+  .nav-link:hover { color: var(--text); border-bottom-color: rgba(74,158,202,.4); }
+  .nav-link.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+  }
+
+  .logo-hex {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  header .subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+
+  /* 3-column layout */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 300px 280px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ══ MAIN ORDER PANEL ══ */
+  .order-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid var(--border);
+  }
+
+  .panel-label {
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 20px 9px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  /* DRINK GRID fills all vertical space */
+  .drinks-grid {
+    flex: 1;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-auto-rows: min-content;
+    gap: 10px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    align-content: start;
+  }
+
+  .drink-card {
+    border: 1px solid var(--border);
+    padding: 22px 18px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    user-select: none;
+  }
+
+  .drink-card:hover {
+    border-color: var(--accent);
+    background: rgba(74,158,202,0.07);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  }
+
+  .drink-card.selected {
+    border-color: var(--accent);
+    background: rgba(74,158,202,0.15);
+    box-shadow: 0 0 0 1px var(--accent), 0 6px 24px rgba(74,158,202,0.2);
+  }
+
+  .drink-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 10px; right: 13px;
+    color: var(--accent);
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .drink-name {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+  }
+
+  .drink-price {
+    font-size: 16px;
+    color: var(--amber);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ORDER CONTROLS strip at bottom */
+  .order-controls {
+    flex-shrink: 0;
+    padding: 14px 16px;
+    border-top: 2px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .selected-drink-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    min-height: 46px;
+  }
+
+  .badge-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .badge-value {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: 0.04em;
+  }
+
+  .badge-price {
+    margin-left: auto;
+    font-size: 15px;
+    color: var(--amber);
+    white-space: nowrap;
+  }
+
+  .controls-row {
+    display: grid;
+    grid-template-columns: 1fr 100px auto auto;
+    gap: 8px;
+    align-items: end;
+  }
+
+  label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+
+  select, input[type="text"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 9px 11px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 38px;
+  }
+
+  select:focus, input:focus { border-color: var(--accent); }
+
+  .btn {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0 18px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    height: 38px;
+  }
+
+  .btn::after { content: ''; position: absolute; inset: 0; background: white; opacity: 0; transition: opacity 0.15s; }
+  .btn:hover::after { opacity: 0.07; }
+  .btn:active::after { opacity: 0.15; }
+
+  .btn-primary {
+    background: #1a3040;
+    color: var(--accent);
+    border: 1px solid #2a4860;
+  }
+
+  .btn-undo {
+    background: #2a1a0a;
+    color: var(--amber);
+    border: 1px solid #4a3010;
+    font-size: 13px;
+  }
+
+  /* RESPONSE BANNER — fixed-height slot so nothing shifts */
+  .banner-slot { height: 60px; padding: 8px 16px; flex-shrink: 0; }
+  .response-banner {
+    height: 100%;
+    display: none;
+    border-left: 4px solid;
+    padding: 0 16px;
+    gap: 12px;
+    align-items: center;
+    animation: bannerIn 0.2s ease;
+  }
+  .response-banner.show { display: flex; }
+  .response-banner.success {
+    border-color: var(--green);
+    background: #0e2a1a;
+    box-shadow: 0 0 20px rgba(46,204,113,0.1);
+  }
+  .response-banner.error {
+    border-color: var(--red);
+    background: #2a0e0e;
+    box-shadow: 0 0 20px rgba(231,76,60,0.1);
+  }
+  .banner-icon { font-size: 22px; flex-shrink: 0; }
+  .banner-body { display: flex; flex-direction: column; gap: 2px; }
+  .banner-status {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .banner-msg { font-size: 13px; opacity: 0.88; }
+  .response-banner.success .banner-icon,
+  .response-banner.success .banner-status { color: var(--green); }
+  .response-banner.success .banner-msg { color: #a8e8c0; }
+  .response-banner.error .banner-icon,
+  .response-banner.error .banner-status { color: var(--red); }
+  .response-banner.error .banner-msg { color: #e8a8a0; }
+  @keyframes bannerIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* ══ BALANCES PANEL ══ */
+  .balances-panel {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .balances-section { flex: 1; overflow-y: auto; }
+
+  .company-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .company-row:hover { background: rgba(74,158,202,0.04); }
+  .company-name { font-family: var(--display); font-size: 15px; font-weight: 600; letter-spacing: 0.04em; }
+  .company-balance { font-size: 13px; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+  /* ══ LOG PANEL ══ */
+  .log-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .log-area {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .log-row {
+    padding: 9px 16px;
+    border-bottom: 1px solid #10141a;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .log-row:hover { background: rgba(255,255,255,0.015); }
+  .log-ts { color: var(--muted); display: block; margin-bottom: 2px; }
+  .log-msg { color: var(--text); }
+
+  .empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .refresh-bar {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .refresh-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .last-updated { font-size: 10px; color: var(--muted); }
+
+  select option { background: #0e1216; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-hex"></div>
+  <h1>Bar Terminal</h1>
+  <span class="subtitle">Point of Sale System</span>
+</header>
+
+<nav class="nav-strip">
+  <a href="bar"    class="nav-link active">Bar</a>
+  <a href="casino" class="nav-link">Casino</a>
+  <a href="transfer" class="nav-link">Transfer</a>
+  <a href="stocks"  class="nav-link">Stocks</a>
+  <a href="loans"   class="nav-link">Loans</a>
+  <a href="voting"  class="nav-link">Voting</a>
+  <a href="events"  class="nav-link">Events</a>
+</nav>
+
+<div class="main">
+
+  <!-- MAIN: ORDER PANEL -->
+  <div class="order-panel">
+    <div class="panel-label">Select a Drink</div>
+
+    <div class="drinks-grid" id="drinks-grid">
+      <div class="empty-state" style="grid-column:1/-1">Loading…</div>
+    </div>
+
+    <div class="order-controls">
+      <div class="selected-drink-badge">
+        <span class="badge-label">Drink</span>
+        <span class="badge-value" id="badge-name">— none selected —</span>
+        <span class="badge-price" id="badge-price"></span>
+      </div>
+
+      <div class="controls-row">
+        <div>
+          <label>Company</label>
+          <select id="company-select">
+            <option value="">— Select —</option>
+          </select>
+        </div>
+        <div>
+          <label>Qty</label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="amount" value="1" />
+        </div>
+        <button class="btn btn-primary" onclick="purchase()">▶ Complete Sale</button>
+        <button class="btn btn-undo" onclick="undo()">↺ Undo</button>
+      </div>
+
+      <div class="banner-slot">
+        <div class="response-banner" id="response-banner">
+          <div class="banner-icon" id="banner-icon"></div>
+          <div class="banner-body">
+            <div class="banner-status" id="banner-status"></div>
+            <div class="banner-msg" id="banner-msg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT 1: BALANCES -->
+  <div class="balances-panel">
+    <div class="panel-label">Company Balances</div>
+    <div class="balances-section" id="balances">
+      <div class="empty-state">Loading…</div>
+    </div>
+    <div class="refresh-bar">
+      <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+      <span class="last-updated" id="last-updated"></span>
+    </div>
+  </div>
+
+  <!-- RIGHT 2: LOG -->
+  <div class="log-panel">
+    <div class="panel-label">Transaction Log</div>
+    <div class="log-area" id="log-area">
+      <div class="empty-state">Loading…</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const BASE = `http://${window.location.hostname}:5000`;
+let selectedDrink = null;
+
+async function loadAll() {
+  await Promise.all([loadDrinks(), loadCompanies(), loadLog()]);
+  document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+}
+
+async function loadDrinks() {
+  try {
+    const res = await fetch(`${BASE}/api/bar/drinks`);
+    const data = await res.json();
+    renderDrinks(data);
+  } catch (e) {
+    document.getElementById('drinks-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1">Could not reach API</div>';
+  }
+}
+
+function renderDrinks(drinks) {
+  const el = document.getElementById('drinks-grid');
+  if (!drinks.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1">No drinks available</div>'; return; }
+  el.innerHTML = drinks.map(d => `
+    <div class="drink-card${selectedDrink?.id === d.id ? ' selected' : ''}"
+         onclick="selectDrink(${d.id}, '${d.asset_name}', ${d.worth})"
+         id="drink-${d.id}">
+      <div class="drink-name">${d.asset_name}</div>
+      <div class="drink-price">${d.worth}</div>
+    </div>`).join('');
+}
+
+function selectDrink(id, name, price) {
+  selectedDrink = { id, name, price };
+  document.querySelectorAll('.drink-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById(`drink-${id}`);
+  if (card) card.classList.add('selected');
+  document.getElementById('badge-name').textContent = name;
+  document.getElementById('badge-price').textContent = price;
+}
+
+async function loadCompanies() {
+  try {
+    const res = await fetch(`${BASE}/api/company/list`);
+    const data = await res.json();
+    renderBalances(data);
+    renderSelect(data);
+  } catch (e) {
+    document.getElementById('balances').innerHTML = '<div class="empty-state">Could not reach API</div>';
+  }
+}
+
+function renderSelect(companies) {
+  const sel = document.getElementById('company-select');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Select —</option>';
+  companies.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  if (cur) sel.value = cur;
+}
+
+function renderBalances(companies) {
+  const el = document.getElementById('balances');
+  if (!companies.length) { el.innerHTML = '<div class="empty-state">No companies</div>'; return; }
+  el.innerHTML = companies.map(c => `
+    <div class="company-row">
+      <span class="company-name">${c.name}</span>
+      <span class="company-balance">${c.balance.toLocaleString()}</span>
+    </div>`).join('');
+}
+
+async function loadLog() {
+  try {
+    const res = await fetch(`${BASE}/api/log/bar`);
+    const data = await res.json();
+    const el = document.getElementById('log-area');
+    if (!data.length) { el.innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
+    el.innerHTML = [...data].reverse().map(row => `
+      <div class="log-row">
+        <span class="log-ts">${row.timestamp}</span>
+        <span class="log-msg">${row.msg}</span>
+      </div>`).join('');
+  } catch (e) {
+    document.getElementById('log-area').innerHTML = '<div class="empty-state">Could not reach API</div>';
+  }
+}
+
+async function purchase() {
+  const company_id = parseInt(document.getElementById('company-select').value);
+  const amount = parseInt(document.getElementById('amount').value);
+  if (!company_id) { showBanner('Select a company first', 'error'); return; }
+  if (!selectedDrink) { showBanner('Select a drink first', 'error'); return; }
+  if (!amount || amount <= 0) { showBanner('Enter a valid amount', 'error'); return; }
+  try {
+    const res = await fetch(`${BASE}/api/bar/purchase`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ company_id, drink_id: selectedDrink.id, amount })
+    });
+    const data = await res.json();
+    showBanner(data.msg, data.status);
+    if (data.status === 'success') loadAll();
+  } catch (e) {
+    showBanner('Could not reach API', 'error');
+  }
+}
+
+async function undo() {
+  try {
+    const res = await fetch(`${BASE}/api/bar/undo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const data = await res.json();
+    showBanner(data.msg, data.status);
+    if (data.status === 'success') loadAll();
+  } catch (e) {
+    showBanner('Could not reach API', 'error');
+  }
+}
+
+let bannerTimer;
+function showBanner(msg, type) {
+  const banner = document.getElementById('response-banner');
+  document.getElementById('banner-icon').textContent = type === 'success' ? '✓' : '✕';
+  document.getElementById('banner-status').textContent = type === 'success' ? 'Success' : 'Error';
+  document.getElementById('banner-msg').textContent = msg;
+  banner.className = `response-banner ${type} show`;
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(() => banner.classList.remove('show'), 5000);
+}
+
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>

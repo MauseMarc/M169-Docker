@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voting Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080b0e;
+  --surface: #0e1216;
+  --surface2: #12171d;
+  --border: #1a2230;
+  --accent: #4a9eca;
+  --accent2: #7bbde0;
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --amber: #e0a030;
+  --text: #c8d4e0;
+  --muted: #4a5868;
+  --mono: 'Share Tech Mono', monospace;
+  --display: 'Barlow Condensed', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--mono); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+header { border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; gap: 16px; background: var(--surface); flex-shrink: 0; }
+.logo { width: 26px; height: 26px; background: var(--accent); clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); flex-shrink: 0; }
+header h1 { font-family: var(--display); font-weight: 900; font-size: 24px; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
+header .subtitle { font-size: 11px; color: var(--muted); letter-spacing: .2em; text-transform: uppercase; margin-left: auto; }
+
+.nav-strip { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.nav-link { font-family: var(--display); font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 9px 12px; border-bottom: 2px solid transparent; transition: all .15s; }
+.nav-link:hover { color: var(--text); border-bottom-color: rgba(74,158,202,.4); }
+.nav-link.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.main { display: grid; grid-template-columns: 1fr 1fr; flex: 1; overflow: hidden; }
+
+.panel { display: flex; flex-direction: column; overflow-y: auto; border-right: 1px solid var(--border); scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.panel:last-child { border-right: none; }
+.panel-label { font-family: var(--display); font-size: 11px; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--muted); padding: 12px 20px 9px; border-bottom: 1px solid var(--border); flex-shrink: 0; position: sticky; top: 0; background: var(--bg); z-index: 1; }
+
+.form-area { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.form-title { font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: .1em; color: var(--accent2); text-transform: uppercase; }
+label { display: block; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+select, input[type="text"] {
+  width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+  font-family: var(--mono); font-size: 13px; padding: 9px 11px; outline: none;
+  transition: border-color .2s; appearance: none; -webkit-appearance: none; height: 38px;
+}
+input[type="text"] { height: 38px; }
+select:focus, input:focus { border-color: var(--accent); }
+select option { background: var(--surface); }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.btn { font-family: var(--display); font-weight: 700; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; padding: 0 20px; border: none; cursor: pointer; transition: all .15s; position: relative; overflow: hidden; white-space: nowrap; height: 38px; }
+.btn::after { content: ''; position: absolute; inset: 0; background: white; opacity: 0; transition: opacity .15s; }
+.btn:hover:not(:disabled)::after { opacity: .07; }
+.btn:active:not(:disabled)::after { opacity: .15; }
+.btn:disabled { opacity: .3; cursor: not-allowed; }
+.btn-primary { background: #1a3040; color: var(--accent); border: 1px solid #2a4860; }
+.btn-amber   { background: #3a2a0a; color: var(--amber); border: 1px solid #5a4020; }
+
+.banner-slot { height: 60px; padding: 8px 20px; flex-shrink: 0; }
+.response-banner { height: 100%; display: none; align-items: center; gap: 12px; border-left: 4px solid; padding: 0 16px; animation: bannerIn .2s ease; }
+.response-banner.show { display: flex; }
+.response-banner.success { border-color: var(--green); background: #0e2a1a; box-shadow: 0 0 20px rgba(46,204,113,.1); }
+.response-banner.error   { border-color: var(--red);   background: #2a0e0e; box-shadow: 0 0 20px rgba(231,76,60,.1); }
+.banner-icon { font-size: 20px; flex-shrink: 0; }
+.banner-body { display: flex; flex-direction: column; gap: 2px; }
+.banner-status { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+.banner-msg { font-size: 12px; opacity: .88; }
+.response-banner.success .banner-icon, .response-banner.success .banner-status { color: var(--green); }
+.response-banner.success .banner-msg { color: #a8e8c0; }
+.response-banner.error .banner-icon, .response-banner.error .banner-status { color: var(--red); }
+.response-banner.error .banner-msg { color: #e8a8a0; }
+@keyframes bannerIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0 0; }
+.note { font-size: 11px; color: var(--muted); padding: 0; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"></div>
+  <h1>Voting Terminal</h1>
+  <span class="subtitle">Vote &amp; Invention System</span>
+</header>
+
+<nav class="nav-strip">
+  <a href="bar"     class="nav-link">Bar</a>
+  <a href="casino"  class="nav-link">Casino</a>
+  <a href="transfer" class="nav-link">Transfer</a>
+  <a href="stocks"   class="nav-link">Stocks</a>
+  <a href="loans"    class="nav-link">Loans</a>
+  <a href="voting"   class="nav-link active">Voting</a>
+  <a href="events"   class="nav-link">Events</a>
+</nav>
+
+<div class="main">
+
+  <!-- PANEL 1: Simple Vote -->
+  <div class="panel">
+    <div class="panel-label">Vote</div>
+    <div class="form-area">
+      <div class="form-title">Cast a Vote</div>
+      <div>
+        <label>Company</label>
+        <select id="vote-company" onchange="checkVoteForm()">
+          <option value="">— Select Company —</option>
+        </select>
+      </div>
+      <div class="row-2">
+        <div>
+          <label>Yay Votes</label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="vote-yay" min="0" value="0">
+        </div>
+        <div>
+          <label>Nay Votes</label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="vote-nay" min="0" value="0">
+        </div>
+      </div>
+      <button class="btn btn-primary" id="btn-vote" disabled onclick="submitVote()">▶ Submit Vote</button>
+    </div>
+    <div class="banner-slot">
+      <div class="response-banner" id="vote-banner">
+        <div class="banner-icon" id="vb-icon"></div>
+        <div class="banner-body">
+          <div class="banner-status" id="vb-status"></div>
+          <div class="banner-msg"    id="vb-msg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 2: Invention -->
+  <div class="panel">
+    <div class="panel-label">Invention</div>
+    <div class="form-area">
+      <div class="form-title">New Invention</div>
+
+      <div>
+        <label>Invention Name</label>
+        <input type="text" id="inv-name" placeholder="Enter invention name" oninput="checkInvForm()">
+      </div>
+      <div>
+        <label>Company (Creator)</label>
+        <select id="inv-company" onchange="checkInvForm()">
+          <option value="">— Select Company —</option>
+        </select>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="row-2">
+        <div>
+          <label>Funding Amount ($)</label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="inv-amount" min="0" value="0">
+        </div>
+        <div>
+          <label>Equity (%)</label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="inv-equity" min="0" value="0">
+        </div>
+      </div>
+      <div>
+        <label>Investor Company</label>
+        <select id="inv-investor">
+          <option value="">— None —</option>
+        </select>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="row-2">
+        <div>
+          <label>Yay Votes</label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="inv-yay" min="0" value="0">
+        </div>
+        <div>
+          <label>Nay Votes</label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="inv-nay" min="0" value="0">
+        </div>
+      </div>
+
+      <button class="btn btn-amber" id="btn-inv" disabled onclick="submitInvention()">▶ Submit Invention</button>
+    </div>
+    <div class="banner-slot">
+      <div class="response-banner" id="inv-banner">
+        <div class="banner-icon" id="ib-icon"></div>
+        <div class="banner-body">
+          <div class="banner-status" id="ib-status"></div>
+          <div class="banner-msg"    id="ib-msg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const BASE = `http://${window.location.hostname}:5000`;
+let voteTimer, invTimer;
+
+function checkVoteForm() {
+  document.getElementById('btn-vote').disabled = !document.getElementById('vote-company').value;
+}
+
+function checkInvForm() {
+  const name    = document.getElementById('inv-name').value.trim();
+  const company = document.getElementById('inv-company').value;
+  document.getElementById('btn-inv').disabled = !(name && company);
+}
+
+async function loadCompanies() {
+  try {
+    const r    = await fetch(`${BASE}/api/company/list`);
+    const data = await r.json();
+    const opts = data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+    ['vote-company', 'inv-company'].forEach(id => {
+      const sel = document.getElementById(id);
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">— Select Company —</option>' + opts;
+      if (cur) sel.value = cur;
+    });
+
+    const inv = document.getElementById('inv-investor');
+    const ic  = inv.value;
+    inv.innerHTML = '<option value="">— None —</option>' + opts;
+    if (ic) inv.value = ic;
+
+    checkVoteForm();
+    checkInvForm();
+  } catch {}
+}
+
+async function submitVote() {
+  const company_id = parseInt(document.getElementById('vote-company').value);
+  const yay = parseInt(document.getElementById('vote-yay').value) || 0;
+  const nay = parseInt(document.getElementById('vote-nay').value) || 0;
+  try {
+    const r = await fetch(`${BASE}/api/event/vote`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ company_id, yay, nay })
+    });
+    const d = await r.json();
+    showBanner('vote', d.msg, d.status);
+  } catch {
+    showBanner('vote', 'Could not reach API', 'error');
+  }
+}
+
+async function submitInvention() {
+  const name        = document.getElementById('inv-name').value.trim();
+  const company_id  = parseInt(document.getElementById('inv-company').value);
+  const amount      = parseInt(document.getElementById('inv-amount').value)  || 0;
+  const equity      = parseInt(document.getElementById('inv-equity').value)  || 0;
+  const yay         = parseInt(document.getElementById('inv-yay').value)     || 0;
+  const nay         = parseInt(document.getElementById('inv-nay').value)     || 0;
+  const invRaw      = document.getElementById('inv-investor').value;
+  const investor_id = invRaw ? parseInt(invRaw) : null;
+  try {
+    const r = await fetch(`${BASE}/api/invention/add`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, company_id, yay, nay, amount, investor_id, equity })
+    });
+    const d = await r.json();
+    showBanner('inv', d.msg, d.status);
+  } catch {
+    showBanner('inv', 'Could not reach API', 'error');
+  }
+}
+
+function showBanner(which, msg, type) {
+  const isVote = which === 'vote';
+  const el     = document.getElementById(isVote ? 'vote-banner' : 'inv-banner');
+  const p      = isVote ? 'vb' : 'ib';
+  document.getElementById(`${p}-icon`).textContent   = type === 'success' ? '✓' : '✕';
+  document.getElementById(`${p}-status`).textContent = type === 'success' ? 'Success' : 'Error';
+  document.getElementById(`${p}-msg`).textContent    = msg;
+  el.className = `response-banner ${type} show`;
+  if (isVote) {
+    clearTimeout(voteTimer);
+    voteTimer = setTimeout(() => el.classList.remove('show'), 6000);
+  } else {
+    clearTimeout(invTimer);
+    invTimer = setTimeout(() => el.classList.remove('show'), 6000);
+  }
+}
+
+loadCompanies();
+</script>
+</body>
+</html>

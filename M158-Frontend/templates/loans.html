@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bank Loans</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080b0e;
+  --surface: #0e1216;
+  --surface2: #12171d;
+  --border: #1a2230;
+  --accent: #4a9eca;
+  --accent2: #7bbde0;
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --amber: #e0a030;
+  --text: #c8d4e0;
+  --muted: #4a5868;
+  --mono: 'Share Tech Mono', monospace;
+  --display: 'Barlow Condensed', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--mono); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+header { border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; gap: 16px; background: var(--surface); flex-shrink: 0; }
+.logo { width: 26px; height: 26px; background: var(--accent); clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); flex-shrink: 0; }
+header h1 { font-family: var(--display); font-weight: 900; font-size: 24px; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
+header .subtitle { font-size: 11px; color: var(--muted); letter-spacing: .2em; text-transform: uppercase; margin-left: auto; }
+
+.nav-strip { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.nav-link { font-family: var(--display); font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 9px 14px; border-bottom: 2px solid transparent; transition: all .15s; }
+.nav-link:hover { color: var(--text); border-bottom-color: rgba(74,158,202,.4); }
+.nav-link.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.main { display: grid; grid-template-columns: 300px 1fr 260px; flex: 1; overflow: hidden; }
+
+.panel { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+.panel:last-child { border-right: none; }
+.panel-label { font-family: var(--display); font-size: 11px; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--muted); padding: 12px 20px 9px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+
+.form-area { padding: 20px; display: flex; flex-direction: column; gap: 14px; border-bottom: 1px solid var(--border); }
+.form-title { font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: .1em; color: var(--accent2); text-transform: uppercase; }
+label { display: block; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+select { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 13px; padding: 9px 11px; outline: none; transition: border-color .2s; appearance: none; -webkit-appearance: none; height: 38px; }
+select:focus { border-color: var(--accent); }
+select option { background: var(--surface); }
+
+/* package info strip */
+.pkg-strip { padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); font-size: 12px; color: var(--muted); min-height: 36px; display: flex; align-items: center; gap: 14px; }
+.pkg-val { color: var(--text); font-weight: 600; }
+
+.btn { font-family: var(--display); font-weight: 700; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; padding: 0 20px; border: none; cursor: pointer; transition: all .15s; position: relative; overflow: hidden; white-space: nowrap; height: 38px; }
+.btn::after { content: ''; position: absolute; inset: 0; background: white; opacity: 0; transition: opacity .15s; }
+.btn:hover:not(:disabled)::after { opacity: .07; }
+.btn:active:not(:disabled)::after { opacity: .15; }
+.btn:disabled { opacity: .3; cursor: not-allowed; }
+.btn-primary { background: #1a3040; color: var(--accent); border: 1px solid #2a4860; }
+.btn-red     { background: #3a1a1a; color: var(--red);    border: 1px solid #5a2a2a; }
+.btn-sm      { font-size: 11px; padding: 0 12px; height: 30px; }
+
+.banner-slot { height: 60px; padding: 8px 20px; flex-shrink: 0; }
+.response-banner { height: 100%; display: none; align-items: center; gap: 12px; border-left: 4px solid; padding: 0 16px; animation: bannerIn .2s ease; }
+.response-banner.show { display: flex; }
+.response-banner.success { border-color: var(--green); background: #0e2a1a; box-shadow: 0 0 20px rgba(46,204,113,.1); }
+.response-banner.error   { border-color: var(--red);   background: #2a0e0e; box-shadow: 0 0 20px rgba(231,76,60,.1); }
+.banner-icon { font-size: 20px; flex-shrink: 0; }
+.banner-body { display: flex; flex-direction: column; gap: 2px; }
+.banner-status { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+.banner-msg { font-size: 12px; opacity: .88; }
+.response-banner.success .banner-icon, .response-banner.success .banner-status { color: var(--green); }
+.response-banner.success .banner-msg { color: #a8e8c0; }
+.response-banner.error .banner-icon, .response-banner.error .banner-status { color: var(--red); }
+.response-banner.error .banner-msg { color: #e8a8a0; }
+@keyframes bannerIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* active loans list */
+.balances-area { flex: 1; overflow-y: auto; }
+.company-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); transition: background .15s; }
+.company-row:hover { background: rgba(74,158,202,.04); }
+.company-name { font-family: var(--display); font-size: 15px; font-weight: 600; letter-spacing: .04em; }
+.company-balance { font-size: 13px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.loan-list { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.loan-row { display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); gap: 12px; transition: background .15s; }
+.loan-row:hover { background: rgba(231,76,60,.03); }
+.loan-info { flex: 1; min-width: 0; }
+.loan-title { font-family: var(--display); font-size: 14px; font-weight: 600; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.loan-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.loan-left { font-size: 13px; font-weight: 600; color: var(--red); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.log-area { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.log-row { padding: 9px 20px; border-bottom: 1px solid #10141a; font-size: 11px; line-height: 1.5; }
+.log-row:hover { background: rgba(255,255,255,.015); }
+.log-ts { color: var(--muted); display: block; margin-bottom: 2px; }
+.log-msg { color: var(--text); }
+
+.refresh-bar { padding: 10px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--surface); flex-shrink: 0; }
+.refresh-btn { font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; padding: 5px 12px; background: transparent; border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: all .15s; }
+.refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+.last-updated { font-size: 10px; color: var(--muted); }
+
+.empty-state { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 11px; letter-spacing: .1em; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"></div>
+  <h1>Bank Loans</h1>
+  <span class="subtitle">Loan Management System</span>
+</header>
+
+<nav class="nav-strip">
+  <a href="bar"    class="nav-link">Bar</a>
+  <a href="casino" class="nav-link">Casino</a>
+  <a href="transfer" class="nav-link">Transfer</a>
+  <a href="stocks"  class="nav-link">Stocks</a>
+  <a href="loans"   class="nav-link active">Loans</a>
+  <a href="voting"  class="nav-link">Voting</a>
+  <a href="events"  class="nav-link">Events</a>
+</nav>
+
+<div class="main">
+
+  <!-- PANEL 1: Take Loan Form -->
+  <div class="panel">
+    <div class="panel-label">Take a Loan</div>
+    <div class="form-area">
+      <div class="form-title">New Loan</div>
+      <div>
+        <label>Loan Package</label>
+        <select id="pkg-sel" onchange="onPkgChange(); checkForm()">
+          <option value="">— Select Package —</option>
+        </select>
+      </div>
+      <div class="pkg-strip" id="pkg-strip">Select a package to see details</div>
+      <div>
+        <label>Company</label>
+        <select id="company-sel" onchange="checkForm()">
+          <option value="">— Select Company —</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="btn-loan" disabled onclick="buyLoan()">▶ Take Loan</button>
+    </div>
+    <div class="banner-slot">
+      <div class="response-banner" id="banner">
+        <div class="banner-icon" id="b-icon"></div>
+        <div class="banner-body">
+          <div class="banner-status" id="b-status"></div>
+          <div class="banner-msg"    id="b-msg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-label" style="border-top:1px solid var(--border)">Company Balances</div>
+    <div class="balances-area" id="balances">
+      <div class="empty-state">Loading…</div>
+    </div>
+  </div>
+
+  <!-- PANEL 2: Active Loans -->
+  <div class="panel">
+    <div class="panel-label">Active Loans</div>
+    <div class="loan-list" id="loan-list">
+      <div class="empty-state">Loading…</div>
+    </div>
+    <div class="refresh-bar">
+      <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+      <span class="last-updated" id="last-updated"></span>
+    </div>
+  </div>
+
+  <!-- PANEL 3: Loan Log -->
+  <div class="panel">
+    <div class="panel-label">Loan Log</div>
+    <div class="log-area" id="log-area">
+      <div class="empty-state">Loading…</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const BASE = `http://${window.location.hostname}:5000`;
+let packages = [];
+let bannerTimer;
+
+function checkForm() {
+  document.getElementById('btn-loan').disabled =
+    !(document.getElementById('pkg-sel').value && document.getElementById('company-sel').value);
+}
+
+function onPkgChange() {
+  const id  = parseInt(document.getElementById('pkg-sel').value);
+  const pkg = packages.find(p => p.id === id);
+  const el  = document.getElementById('pkg-strip');
+  if (pkg) {
+    el.innerHTML =
+      `Amount: <span class="pkg-val">$${pkg.amount.toLocaleString()}</span>` +
+      `&nbsp;&nbsp;/&nbsp;&nbsp;` +
+      `Interest: <span class="pkg-val" style="color:var(--red)">${pkg.interest}%</span>`;
+  } else {
+    el.textContent = 'Select a package to see details';
+  }
+}
+
+async function loadAll() {
+  await Promise.all([loadPackages(), loadCompanies(), loadActiveLoans(), loadLog()]);
+  document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+}
+
+async function loadPackages() {
+  try {
+    const r  = await fetch(`${BASE}/api/loan/packages`);
+    packages = await r.json();
+    const sel = document.getElementById('pkg-sel');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— Select Package —</option>';
+    packages.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.id; o.textContent = p.package;
+      sel.appendChild(o);
+    });
+    if (cur) sel.value = cur;
+    onPkgChange();
+    checkForm();
+  } catch {}
+}
+
+async function loadCompanies() {
+  try {
+    const r    = await fetch(`${BASE}/api/company/list`);
+    const data = await r.json();
+
+    document.getElementById('balances').innerHTML = data.map(c => `
+      <div class="company-row">
+        <span class="company-name">${c.name}</span>
+        <span class="company-balance">${c.balance.toLocaleString()}</span>
+      </div>`).join('');
+
+    const sel  = document.getElementById('company-sel');
+    const cur  = sel.value;
+    sel.innerHTML = '<option value="">— Select Company —</option>';
+    data.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.id; o.textContent = c.name;
+      sel.appendChild(o);
+    });
+    if (cur) sel.value = cur;
+    checkForm();
+  } catch {}
+}
+
+async function loadActiveLoans() {
+  try {
+    const r     = await fetch(`${BASE}/api/loan/list`);
+    const loans = await r.json();
+    const el    = document.getElementById('loan-list');
+    if (!loans.length) { el.innerHTML = '<div class="empty-state">No active loans</div>'; return; }
+    el.innerHTML = loans.map(l => `
+      <div class="loan-row">
+        <div class="loan-info">
+          <div class="loan-title">${l.company_name ?? l.company} — ${l.package}</div>
+          <div class="loan-sub">Original $${l.amount.toLocaleString()} &nbsp;/&nbsp; ${l.interest}% interest</div>
+        </div>
+        <span class="loan-left">$${l.current_amount.toLocaleString()}</span>
+        <button class="btn btn-red btn-sm" onclick="payLoan(${l.id})">Pay Off</button>
+      </div>`).join('');
+  } catch {
+    document.getElementById('loan-list').innerHTML = '<div class="empty-state">Could not reach API</div>';
+  }
+}
+
+async function loadLog() {
+  try {
+    const r    = await fetch(`${BASE}/api/log/loan`);
+    const data = await r.json();
+    const el   = document.getElementById('log-area');
+    if (!data.length) { el.innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
+    el.innerHTML = [...data].reverse().map(l => `
+      <div class="log-row">
+        <span class="log-ts">${l.timestamp}</span>
+        <span class="log-msg">${l.msg}</span>
+      </div>`).join('');
+  } catch {
+    document.getElementById('log-area').innerHTML = '<div class="empty-state">Could not reach API</div>';
+  }
+}
+
+async function buyLoan() {
+  const pkg     = parseInt(document.getElementById('pkg-sel').value);
+  const company = parseInt(document.getElementById('company-sel').value);
+  try {
+    const r = await fetch(`${BASE}/api/loan/buy`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ company, package: pkg })
+    });
+    const d = await r.json();
+    showBanner(d.msg, d.status);
+    if (d.status === 'success') loadAll();
+  } catch {
+    showBanner('Could not reach API', 'error');
+  }
+}
+
+async function payLoan(id) {
+  try {
+    const r = await fetch(`${BASE}/api/loan/payback`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const d = await r.json();
+    showBanner(d.msg, d.status);
+    if (d.status === 'success') loadAll();
+  } catch {
+    showBanner('Could not reach API', 'error');
+  }
+}
+
+function showBanner(msg, type) {
+  const el = document.getElementById('banner');
+  document.getElementById('b-icon').textContent   = type === 'success' ? '✓' : '✕';
+  document.getElementById('b-status').textContent = type === 'success' ? 'Success' : 'Error';
+  document.getElementById('b-msg').textContent    = msg;
+  el.className = `response-banner ${type} show`;
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(() => el.classList.remove('show'), 6000);
+}
+
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>
