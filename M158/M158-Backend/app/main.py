@@ -156,7 +156,7 @@ def payback_loan():
                 amount = loan["current_amount"]
                 straight_interest = amount - loan["amount"]
                 db_functions.update_loan(loan_id)
-                db_functions.ledger_insert(company_id, 1, amount, loan["asset_id"], str(loan_id) + "-" + str(straight_interest)+"$")
+                db_functions.ledger_insert(company_id, 1, amount, loan["asset_id"], str(loan_id) + "-" + str(straight_interest) + "$")
                 return jsonify(status="success", msg=f"{loan["company_name"]} paid {straight_interest}$ in straight interests")
         return jsonify(status="error", msg="idk")
     except Exception as e:
@@ -177,7 +177,7 @@ def buy_loan_package():
                     interest = package["interest"]
                     # Log the Loan bought and transfer the money
                     db_functions.loan_insert(company, amount, interest, package_id)
-                    db_functions.ledger_insert(1, company, amount, package_id, str(interest)+"%")
+                    db_functions.ledger_insert(1, company, amount, package_id, str(interest) + "%")
                     return jsonify(status="success", msg="Loan successfully bought")
                 except Exception as e:
                     return jsonify(status="error", msg=e)
@@ -278,7 +278,7 @@ def undo_order():
             elif log["id"] in bank_returns:
                 continue
             else:
-                db_functions.ledger_insert(log["recipient_id"], log["sender_id"],log["amount"],log["asset_id"],log["id"])
+                db_functions.ledger_insert(log["recipient_id"], log["sender_id"], log["amount"], log["asset_id"], log["id"])
                 return jsonify(status="success", msg=f"Undone Purchase {log["id"]}")
         return jsonify(status="error", msg="No Purchases to Undo")
     except Exception as e:
@@ -522,3 +522,4 @@ def get_player_status():
 if __name__ == '__main__':
     # host='0.0.0.0' makes it accessible on your Local WiFi
     app.run(host='0.0.0.0', port=5000, debug=True)
+    # app.run(port=5000, debug=True)

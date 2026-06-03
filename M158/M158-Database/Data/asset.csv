@@ -1,0 +1,34 @@
+id,asset_name,asset_code,category
+1,Dooolers,,bank
+2,Casino-Chips,,casino
+3,Quicksolver Loan,200-25,loan
+4,Business Loan,5000-15,loan
+5,Big Business Loan,25000-5,loan
+6,Vote,,vote
+7,Status,,status
+11,Tequila Sunset,120,drink
+12,Liescher Shot,35,drink
+13,Moscow Mule,65,drink
+14,Mojitos,85,drink
+15,Cuba Libre,35,drink
+16,Gin Tonic,40,drink
+17,Hugo,70,drink
+18,Cape Codder,40,drink
+19,Gummibärli,50,drink
+20,Bier,25,drink
+21,Vodka Energy,60,drink
+50,Any Shot,50,drink
+51,Plug AGStock,PLUG,stock
+52,LonelyAIStock,LYAI,stock
+53,AkwardTeck EnterpriseStock,ATE,stock
+54,Il LEGAL °Stock,IL,stock
+55,Bitch LandStock,BLND,stock
+56,4ever sexc timeStock,FST,stock
+57,Glückspille,,invention
+58,VAD,,invention
+59,Lonely AI,,invention
+60,Dr Plugger,,invention
+61,Happypills,,invention
+62,4ever sexc time,,invention
+63,Happy Cream,,invention
+64,Plugger Vape,,invention

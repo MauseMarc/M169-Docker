@@ -9,7 +9,7 @@
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
     <data-source source="LOCAL" name="test" uuid="5d27ed1c-6940-4868-a2bc-53d2989974a0">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>bb39b8b8-dc58-4ea3-8aed-f7e915ada3a4</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/database/test.db</jdbc-url>
