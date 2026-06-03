@@ -1,5 +1,4 @@
 FROM python:3.12.2-slim
-ADD app/main.py .
 
 WORKDIR /app
 COPY app/ .

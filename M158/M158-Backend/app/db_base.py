@@ -1,4 +1,4 @@
-import mariadb
+import pymysql
 import os
 
 db_host = os.environ['DB_HOST']
@@ -13,10 +13,11 @@ CONN_PARAMS = {
     'user': db_user,
     'password': db_password,
     'database': db_name,
-    'port': db_port
+    'port': db_port,
+    'cursorclass': pymysql.cursors.DictCursor
 }
 
 
 def get_db():
-    conn = mariadb.connect(**CONN_PARAMS)
+    conn = pymysql.connect(**CONN_PARAMS)
     return conn
