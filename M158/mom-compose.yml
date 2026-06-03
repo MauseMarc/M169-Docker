@@ -12,6 +12,7 @@ services:
       - "5000:5000"
     restart: always
     environment:
+      # alles platzhalter
       - DB_HOST=db #name des Datenbank service
       - DB_USER=username
       - DB_PASSWORD=timoistdaspasswort
@@ -27,6 +28,7 @@ services:
       - "3306"
     restart: always
     environment:
+      # platzhalter
       MARIADB_ROOT_PASSWORD: timoistdaspasswort
       MARIADB_DATABASE: idk gang
 
