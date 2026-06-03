@@ -13,3 +13,6 @@ etc.
 
 Der Befehl zum exportieren:
     'sqlite3 test.db .dump > database_dump.sql'
+
+Lies Kommentare im mom-compose.yml
+Es gibt einen Weg wie diese .sql Datei in die Datenbank geht.

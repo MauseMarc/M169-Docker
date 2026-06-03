@@ -31,7 +31,12 @@ services:
       # platzhalter
       MARIADB_ROOT_PASSWORD: timoistdaspasswort
       MARIADB_DATABASE: idk gang
+    volumes:
+      - persistent_data:/var/lib/mysql # Folder named persistent_data idk yet where it's stored
 
+      # the sql dump has to be named migration.sql and be located inside the M158-Database folder
+      #  /docker-entrypoint-initdb.d    ist der ordner für die Initialisierung. Wird nur gebraucht beim ersten Start. liest automatisch .sql dateien
+      - ./M158-Database/migration.sql:/docker-entrypoint-initdb.d/migration.sql:ro # ro means read only
     networks:
       - mom
 
