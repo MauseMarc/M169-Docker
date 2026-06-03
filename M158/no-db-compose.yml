@@ -1,0 +1,21 @@
+services:
+  webserver:
+    image: ghcr.io/mausemarc/mausegibb-projekte/mom-frontend:v1
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - mom
+  backend:
+    image: ghcr.io/mausemarc/mausegibb-projekte/mom-backend-old:v1
+    ports:
+      - "5000:5000"
+    restart: always
+    networks:
+      - mom
+
+
+networks:
+  mom:
+    name: mom
+    driver: bridge
