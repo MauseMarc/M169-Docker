@@ -31,6 +31,8 @@ services:
       # platzhalter
       MARIADB_ROOT_PASSWORD: timoistdaspasswort
       MARIADB_DATABASE: mom_db
+      MARIADB_USER: Gamemaster
+      MARIADB_PASSWORD: timoistdaspasswort
     volumes:
       - persistent_data:/var/lib/mysql # Folder named persistent_data idk yet where it's stored
 
