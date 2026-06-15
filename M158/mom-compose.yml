@@ -14,9 +14,9 @@ services:
     environment:
       # alles platzhalter
       - DB_HOST=db #name des Datenbank service
-      - DB_USER=username
+      - DB_USER=Gamemaster
       - DB_PASSWORD=timoistdaspasswort
-      - DB_NAME=idk gang
+      - DB_NAME=mom_db
       - DB_PORT=3306
     depends_on:
       - db
@@ -30,7 +30,7 @@ services:
     environment:
       # platzhalter
       MARIADB_ROOT_PASSWORD: timoistdaspasswort
-      MARIADB_DATABASE: idk gang
+      MARIADB_DATABASE: mom_db
     volumes:
       - persistent_data:/var/lib/mysql # Folder named persistent_data idk yet where it's stored
 
@@ -44,3 +44,6 @@ networks:
   mom:
     name: mom
     driver: bridge
+
+volumes:
+  persistent_data:
