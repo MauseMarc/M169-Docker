@@ -10409,6 +10409,30 @@ INSERT INTO event VALUES(11,2,'Market Crash -technology','crash',1,3,0,50000);
 INSERT INTO event VALUES(12,2,'Market Crash -medicine','crash',1,3,0,50000);
 INSERT INTO event VALUES(13,2,'Market Crash -agriculture','crash',1,3,0,50000);
 INSERT INTO event VALUES(14,2,'Market Crash -finance','crash',1,3,0,50000);
+CREATE TABLE story (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    story_type TEXT,
+    story_title TEXT,
+    story_text TEXT
+    );
+INSERT INTO story VALUES(1,'invention','The newest Product','COMPANY- has just revealed their newest addition. The amazing -ASSET-.');
+INSERT INTO story VALUES(2,'invention','Wow. What a Product','The -ASSET- is hitting the market at maximum velocity.');
+INSERT INTO story VALUES(3,'conference','Big Statements are coming','Recent -COMPANY- scandals to be cleared up in the upcoming press conference.');
+INSERT INTO story VALUES(4,'slander','The Devils Lettuce','COMPANY- CEO spotted on Ratsteins Island smoking a Joint.');
+INSERT INTO story VALUES(5,'slander','Horrifying News','COMPANY- tests products on infant Marsupials');
+INSERT INTO story VALUES(6,'slander','Studies show','The new -ASSET- causes Cancer. -COMPANY- yet to release statement');
+INSERT INTO story VALUES(7,'slander','Is anyone safe?','Macroplastic found in -COMPANY- CEOs Sperm.');
+INSERT INTO story VALUES(8,'good','Goodhearted People','COMPANY- shipping crates full of Vodka Energy to feed starving children.');
+INSERT INTO story VALUES(9,'good','A good Capitalist','COMPANY- swears they are going to pay child workers in candy.');
+INSERT INTO story VALUES(10,'good','Another Mate','New Mate dropped. -COMPANY- appealing to the youth with vape flavoured drink.');
+INSERT INTO story VALUES(11,'drink','FUCK YES','COMPANY- is paying for Drinks');
+INSERT INTO story VALUES(12,'crash','Market Crash','New Research found metals to cause Cancer. -CATEGORY- companies are suffering.');
+INSERT INTO story VALUES(13,'crash','Market Crash','CATEGORY- companies expected to drop massively after new child disease pandemic.');
+INSERT INTO story VALUES(14,'crash','Market Crash','CATEGORY- companies have lost trust in the public eyes. Too many Rat potions.');
+INSERT INTO story VALUES(15,'slander','The Audacity','COMPANY- promised Pizza and didn''t deliver. Brought vegan Chicken Nuggets instead.');
+INSERT INTO story VALUES(16,'slander','Think of the Shareholders','COMPANY- are planning to focus on Customer Experience INSTEAD of Yearly Profits.');
+COMMIT;
+SET FOREIGN_KEY_CHECKS=1;
 CREATE TABLE active_event (
         id INT AUTO_INCREMENT PRIMARY KEY, 
         timestamp TEXT,
@@ -10446,27 +10470,3 @@ INSERT INTO active_event VALUES(23,'2026-04-18 19:50:14',6,5,10,'1200');
 INSERT INTO active_event VALUES(24,'2026-04-18 20:06:42',3,4,15,'3000');
 INSERT INTO active_event VALUES(25,'2026-04-18 20:10:40',7,4,5,'3000');
 INSERT INTO active_event VALUES(26,'2026-04-18 20:11:09',5,5,9,'1200');
-CREATE TABLE story (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    story_type TEXT,
-    story_title TEXT,
-    story_text TEXT
-    );
-INSERT INTO story VALUES(1,'invention','The newest Product','COMPANY- has just revealed their newest addition. The amazing -ASSET-.');
-INSERT INTO story VALUES(2,'invention','Wow. What a Product','The -ASSET- is hitting the market at maximum velocity.');
-INSERT INTO story VALUES(3,'conference','Big Statements are coming','Recent -COMPANY- scandals to be cleared up in the upcoming press conference.');
-INSERT INTO story VALUES(4,'slander','The Devils Lettuce','COMPANY- CEO spotted on Ratsteins Island smoking a Joint.');
-INSERT INTO story VALUES(5,'slander','Horrifying News','COMPANY- tests products on infant Marsupials');
-INSERT INTO story VALUES(6,'slander','Studies show','The new -ASSET- causes Cancer. -COMPANY- yet to release statement');
-INSERT INTO story VALUES(7,'slander','Is anyone safe?','Macroplastic found in -COMPANY- CEOs Sperm.');
-INSERT INTO story VALUES(8,'good','Goodhearted People','COMPANY- shipping crates full of Vodka Energy to feed starving children.');
-INSERT INTO story VALUES(9,'good','A good Capitalist','COMPANY- swears they are going to pay child workers in candy.');
-INSERT INTO story VALUES(10,'good','Another Mate','New Mate dropped. -COMPANY- appealing to the youth with vape flavoured drink.');
-INSERT INTO story VALUES(11,'drink','FUCK YES','COMPANY- is paying for Drinks');
-INSERT INTO story VALUES(12,'crash','Market Crash','New Research found metals to cause Cancer. -CATEGORY- companies are suffering.');
-INSERT INTO story VALUES(13,'crash','Market Crash','CATEGORY- companies expected to drop massively after new child disease pandemic.');
-INSERT INTO story VALUES(14,'crash','Market Crash','CATEGORY- companies have lost trust in the public eyes. Too many Rat potions.');
-INSERT INTO story VALUES(15,'slander','The Audacity','COMPANY- promised Pizza and didn''t deliver. Brought vegan Chicken Nuggets instead.');
-INSERT INTO story VALUES(16,'slander','Think of the Shareholders','COMPANY- are planning to focus on Customer Experience INSTEAD of Yearly Profits.');
-COMMIT;
-SET FOREIGN_KEY_CHECKS=1;
