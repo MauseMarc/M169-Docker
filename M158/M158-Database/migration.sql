@@ -10431,8 +10431,6 @@ INSERT INTO story VALUES(13,'crash','Market Crash','CATEGORY- companies expected
 INSERT INTO story VALUES(14,'crash','Market Crash','CATEGORY- companies have lost trust in the public eyes. Too many Rat potions.');
 INSERT INTO story VALUES(15,'slander','The Audacity','COMPANY- promised Pizza and didn''t deliver. Brought vegan Chicken Nuggets instead.');
 INSERT INTO story VALUES(16,'slander','Think of the Shareholders','COMPANY- are planning to focus on Customer Experience INSTEAD of Yearly Profits.');
-COMMIT;
-SET FOREIGN_KEY_CHECKS=1;
 CREATE TABLE active_event (
         id INT AUTO_INCREMENT PRIMARY KEY, 
         timestamp TEXT,
@@ -10441,7 +10439,7 @@ CREATE TABLE active_event (
         story_id INTEGER,
         duration_s TEXT,
         FOREIGN KEY (affected_id) REFERENCES company (id),
-        FOREIGN KEY (event_id) REFERENCES event (id)
+        FOREIGN KEY (event_id) REFERENCES event (id),
         FOREIGN KEY (story_id) REFERENCES story (id)
         );
 INSERT INTO active_event VALUES(1,'2026-04-18 17:22:30',5,2,1,'3000');
@@ -10470,3 +10468,5 @@ INSERT INTO active_event VALUES(23,'2026-04-18 19:50:14',6,5,10,'1200');
 INSERT INTO active_event VALUES(24,'2026-04-18 20:06:42',3,4,15,'3000');
 INSERT INTO active_event VALUES(25,'2026-04-18 20:10:40',7,4,5,'3000');
 INSERT INTO active_event VALUES(26,'2026-04-18 20:11:09',5,5,9,'1200');
+COMMIT;
+SET FOREIGN_KEY_CHECKS=1;
