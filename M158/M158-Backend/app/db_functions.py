@@ -233,17 +233,22 @@ def get_drink_list():
 # Get the balance of a specific Company
 def get_company_balance(company_id):
     conn = get_db()
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-                       SELECT (COALESCE((SELECT SUM(amount) FROM ledger WHERE recipient_id = c.id), 0) -
-                               COALESCE((SELECT SUM(amount) FROM ledger WHERE sender_id = c.id), 0))
-                       FROM company c
-                       WHERE c.id = %s
-                       """, (company_id,))
-        result = cursor.fetchone()
-        company_balance = result[0]
-        return company_balance if company_balance else 0
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                           SELECT (COALESCE((SELECT SUM(amount) FROM ledger WHERE recipient_id = c.id), 0) -
+                                   COALESCE((SELECT SUM(amount) FROM ledger WHERE sender_id = c.id), 0))
+                           FROM company c
+                           WHERE c.id = %s
+                           """, (company_id,))
+            result = cursor.fetchone()
+
+            # Safely check if a row was returned
+            if result:
+                return result[0]
+            return 0  # Default to 0 if the company doesn't exist
+    finally:
+        conn.close()
 
 # Get all the Loans available and Format
 def get_loan_list():
