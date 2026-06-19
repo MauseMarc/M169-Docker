@@ -27,7 +27,7 @@ STATUS_WEIGHT = 5 / CHECK_PER_DAY # How strongly the status effects will influen
 STATUS_LIMIT = 45 / CHECK_PER_DAY # How much Status effects max can influence Stock
 
 DRINK_LIMIT = 50
-DRINK_DECAY = 0.90 # How difficult it is to get it up or something (at weight 3 if 3 people buy a drink it won't increase ? but if nobody buys it will go down ?
+DRINK_DECAY = 0.90 # How difficult it is to get it up or something (at weight 3 if 3 people buy a drink it won't increase %s but if nobody buys it will go down %s
 DRINK_SENSITIVITY = 0.15  # 15% movement per 30s check
 DECAY_RATE = 0.98  # Premium drops 2% every 30s if no one buys
 VOLATILITY_FACTOR = 15  # Lower is more "chaotic," higher is more stable
@@ -144,7 +144,7 @@ def get_specific_balance(invite_code):
                       COALESCE((SELECT SUM(amount) FROM ledger WHERE recipient_id = c.id), 0) -
                       COALESCE((SELECT SUM(amount) FROM ledger WHERE sender_id = c.id), 0)
                       )          as cash
-            FROM company c WHERE c.code = ?
+            FROM company c WHERE c.code = %s
         """, (invite_code,))
     result = cursor.fetchall()
     formatted = format_sql_fetch(result)[0]
@@ -167,7 +167,7 @@ def get_log(asset_type):
                                 JOIN company g ON ledger.sender_id = g.id
                                 JOIN company m ON ledger.recipient_id = m.id
                                 JOIN asset a ON ledger.asset_id = a.id
-                       WHERE ledger.asset_id IN (SELECT id FROM asset WHERE category = ?)
+                       WHERE ledger.asset_id IN (SELECT id FROM asset WHERE category = %s)
                        ORDER by ledger.timestamp ASC
                        """, (asset_type,))
         result = cursor.fetchall()
@@ -182,7 +182,7 @@ def latest_bar_purchase():
         cursor = conn.cursor()
         cursor.execute("""
                        SELECT * FROM ledger
-                       WHERE ledger.asset_id IN (SELECT id FROM asset WHERE category = ?)
+                       WHERE ledger.asset_id IN (SELECT id FROM asset WHERE category = %s)
                        ORDER by ledger.timestamp DESC
                        """, ("drink",))
         result = cursor.fetchall()
@@ -198,7 +198,7 @@ def get_asset_worth(asset_id):
             cursor = conn.cursor()
             cursor.execute(f"""
                 SELECT worth FROM stock_ledger 
-                WHERE asset_id = ?
+                WHERE asset_id = %s
                 ORDER BY id DESC LIMIT 1
             """, (asset_id,))
             result = cursor.fetchone()
@@ -239,7 +239,7 @@ def get_company_balance(company_id):
                        SELECT (COALESCE((SELECT SUM(amount) FROM ledger WHERE recipient_id = c.id), 0) -
                                COALESCE((SELECT SUM(amount) FROM ledger WHERE sender_id = c.id), 0))
                        FROM company c
-                       WHERE c.id = ?
+                       WHERE c.id = %s
                        """, (company_id,))
         result = cursor.fetchone()
         company_balance = result[0]
@@ -407,7 +407,7 @@ def get_specific_market(invite_code):
                     JOIN asset a ON sl.asset_id = a.id
                     JOIN company c ON c.asset_id = a.id
                 WHERE a.category = 'stock'
-                    AND c.code = ?
+                    AND c.code = %s
                 ORDER BY sl.timestamp DESC
         """, (invite_code,))
         result = cursor.fetchall()
@@ -436,7 +436,7 @@ def get_one_stock(stock_id):
     with conn:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT worth FROM stock_ledger WHERE asset_id = ?
+            SELECT worth FROM stock_ledger WHERE asset_id = %s
             ORDER BY timestamp DESC
         """, (stock_id,))
         result = cursor.fetchone()
@@ -444,7 +444,7 @@ def get_one_stock(stock_id):
     print(worth)
     return worth
 
-# Get all available Events to choose from. I guess ?
+# Get all available Events to choose from. I guess %s
 def list_events():
     conn = get_db()
     with conn:
@@ -463,7 +463,7 @@ def get_that_event(event_id):
     with conn:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT * FROM event WHERE id = ?
+            SELECT * FROM event WHERE id = %s
         """, (event_id,))
         result = cursor.fetchone()
         formatted = dict(result)
@@ -479,7 +479,7 @@ def update_loan(loan_id):
     with conn:
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE loan SET ongoing = 0 WHERE id = ?
+            UPDATE loan SET ongoing = 0 WHERE id = %s
         """, (loan_id,))
 
 
@@ -496,12 +496,12 @@ def ledger_insert(sender, recipient, amount, asset, detail):
             cursor.execute(f"""
                 INSERT INTO ledger (timestamp, sender_id, recipient_id, amount, asset_id, detail) 
                 VALUES (
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?)
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s)
             """,(timestamp, sender, recipient, amount, asset, detail))
 
             conn.commit()
@@ -517,7 +517,7 @@ def loan_insert(company, amount, interest, loan_id):
             cursor = conn.cursor()
             cursor.execute(f"""
                                     INSERT INTO loan (timestamp, company_id, asset_id, amount, interest_rate) 
-                                    VALUES (?,?,?,?,?)
+                                    VALUES (%s,%s,%s,%s,%s)
                                 """, (timestamp, company, loan_id, amount, interest))
             conn.commit()
     except Exception as e:
@@ -530,7 +530,7 @@ def invention_insert(inv_name, creator_id, vote, funding, investor_id, equity):
     # First Check if that Invention Name already exists
     with conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM asset WHERE asset_name = ?",(inv_name,))
+        cursor.execute("SELECT * FROM asset WHERE asset_name = %s",(inv_name,))
         result = cursor.fetchone()
         if result:
             return "Duplicate"
@@ -540,7 +540,7 @@ def invention_insert(inv_name, creator_id, vote, funding, investor_id, equity):
     try:
         with conn:
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO asset (asset_name, category) VALUES (?,?)",
+            cursor.execute("INSERT INTO asset (asset_name, category) VALUES (%s,%s)",
                            (inv_name, "invention"))
             conn.commit()
         if funding > 0:
@@ -555,13 +555,13 @@ def invention_insert(inv_name, creator_id, vote, funding, investor_id, equity):
             cursor.execute(f"""
                 INSERT INTO invention (timestamp, asset_id, creator_id, investor_id, percentage, vote_score, funding_amount) 
                 VALUES (
-                ?,
-                (SELECT id FROM asset WHERE asset_name = ?),
-                ?,
-                ?,
-                ?,
-                ?,
-                ?
+                %s,
+                (SELECT id FROM asset WHERE asset_name = %s),
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
                 )
             """, (timestamp, inv_name, creator_id, investor, equity_p, vote, funding))
             conn.commit()
@@ -572,9 +572,9 @@ def invention_insert(inv_name, creator_id, vote, funding, investor_id, equity):
                 cursor = conn.cursor()
                 cursor.execute(f"""
                                 INSERT INTO ledger (timestamp, sender_id, recipient_id, amount, asset_id, detail) 
-                                VALUES (?,?,?,?,
-                                (SELECT id FROM asset WHERE asset_name = ?),
-                                ?)
+                                VALUES (%s,%s,%s,%s,
+                                (SELECT id FROM asset WHERE asset_name = %s),
+                                %s)
                             """, (timestamp, investor_id, creator_id, funding, inv_name, "investor"))
 
 
@@ -594,8 +594,8 @@ def event_insert(affected_id, event_id):
             cursor = conn.cursor()
             cursor.execute(f"""
                 INSERT INTO active_event (affected_id, event_id, timestamp, duration_s, story_id) 
-                VALUES (?,?,?,(SELECT duration FROM event WHERE id = ?)*?,
-                (SELECT id FROM story where story_type = (SELECT story_type FROM event WHERE id = ?) ORDER BY RANDOM() LIMIT 1))
+                VALUES (%s,%s,%s,(SELECT duration FROM event WHERE id = %s)*%s,
+                (SELECT id FROM story where story_type = (SELECT story_type FROM event WHERE id = %s) ORDER BY RANDOM() LIMIT 1))
             """, (affected_id, event_id, timestamp, event_id, DAY_LENGTH_S, event_id))
             conn.commit()
         return
@@ -608,7 +608,7 @@ def handle_event_exceptions(event_id):
     with conn:
         cursor = conn.cursor()
         cursor.execute(f"""
-            SELECT event_title FROM event WHERE id = ?
+            SELECT event_title FROM event WHERE id = %s
         """, (event_id,))
         result = cursor.fetchone()
         if result:
@@ -618,8 +618,8 @@ def handle_event_exceptions(event_id):
         cursor = conn.cursor()
         cursor.execute(f"""
             INSERT INTO active_event (affected_id, event_id, timestamp, duration_s, story_id)
-            SELECT id, ?, ?, (SELECT duration FROM event WHERE id = ?)*?, (SELECT id FROM story where story_type = (SELECT story_type FROM event WHERE id = ?) ORDER BY RANDOM() LIMIT 1)
-            FROM company WHERE company_type = ?
+            SELECT id, %s, %s, (SELECT duration FROM event WHERE id = %s)*%s, (SELECT id FROM story where story_type = (SELECT story_type FROM event WHERE id = %s) ORDER BY RANDOM() LIMIT 1)
+            FROM company WHERE company_type = %s
         """, (event_id, timestamp, event_id, DAY_LENGTH_S, event_id, company_type))
         conn.commit()
 
@@ -652,7 +652,7 @@ def is_drink_event():
             return who_pays
     return False
 
-# ??? I NEED THE ID OF THE COMPANY THAT IS GONNA PAY
+# %s%s%s I NEED THE ID OF THE COMPANY THAT IS GONNA PAY
 # ALSO SOMEHOW IF THAT FIRST PLAYER COULDN'T PAY. THEN THE NEXT IN LINE SHOULD.
 # # print(is_drink_event())
 
@@ -666,7 +666,7 @@ def start_company(company_name,stock_code, company_type, invite_code):
         with conn:
             cursor = conn.cursor()
             cursor.execute(f"""
-                SELECT * FROM company WHERE company_name = ?
+                SELECT * FROM company WHERE company_name = %s
             """, (company_name,))
             result = cursor.fetchall()
             if result:
@@ -685,7 +685,7 @@ def start_company(company_name,stock_code, company_type, invite_code):
         # Create Company Stock Asset
         with conn:
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO asset (asset_name, asset_code, category) VALUES (?,?,?)", (asset_name, asset_code, asset_type))
+            cursor.execute("INSERT INTO asset (asset_name, asset_code, category) VALUES (%s,%s,%s)", (asset_name, asset_code, asset_type))
 
             conn.commit()
         # Create Company entry with correct Stock pointer thing
@@ -693,7 +693,7 @@ def start_company(company_name,stock_code, company_type, invite_code):
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO company (company_name, company_type, asset_id, code) 
-                VALUES (?,?,(SELECT id FROM asset WHERE asset_name = ?),?)
+                VALUES (%s,%s,(SELECT id FROM asset WHERE asset_name = %s),%s)
                 """, (company_name, company_type, asset_name, invite_code))
 
             conn.commit()
@@ -702,7 +702,7 @@ def start_company(company_name,stock_code, company_type, invite_code):
         with conn:
             cursor = conn.cursor()
             cursor.execute(f"""
-                SELECT id FROM company WHERE company_name = ?
+                SELECT id FROM company WHERE company_name = %s
                 """, (company_name,))
             result = cursor.fetchone()
 
@@ -725,7 +725,7 @@ def get_invention_nts(company_id):
         cursor.execute(f"""
                 SELECT a.asset_name FROM invention i
                 JOIN asset a ON a.id = i.asset_id
-                WHERE i.creator_id = ?
+                WHERE i.creator_id = %s
             """, (company_id,))
         result = cursor.fetchone()
     if result:
@@ -742,7 +742,7 @@ def get_invention(event_timestamp, company_id):
         cursor.execute(f"""
             SELECT a.asset_name FROM invention i
             JOIN asset a ON a.id = i.asset_id
-            WHERE i.timestamp = ? AND i.creator_id = ?
+            WHERE i.timestamp = %s AND i.creator_id = %s
         """, (event_timestamp, company_id))
         result = cursor.fetchone()
     if result:
@@ -859,7 +859,7 @@ def insert_market(asset_id, worth):
         cursor = conn.cursor()
         cursor.execute(f"""
              INSERT INTO stock_ledger (timestamp, asset_id, worth) 
-             VALUES (?,?,?)""",(timestamp, asset_id, worth))
+             VALUES (%s,%s,%s)""",(timestamp, asset_id, worth))
         conn.commit()
 
 
@@ -879,8 +879,8 @@ def get_stock_transactions(stock_id):
     with conn:
         cursor = conn.cursor()
         cursor.execute(f"""
-                SELECT * FROM ledger WHERE asset_id = ?
-                AND timestamp > ?
+                SELECT * FROM ledger WHERE asset_id = %s
+                AND timestamp > %s
                 ORDER BY timestamp DESC
             """, (stock_id,old_timestamp))
         result = cursor.fetchall()
@@ -905,8 +905,8 @@ def get_votes(company_id):
         cursor = conn.cursor()
         cursor.execute(f"""
             SELECT detail FROM ledger 
-            WHERE recipient_id = ? 
-            AND timestamp > ?
+            WHERE recipient_id = %s 
+            AND timestamp > %s
             AND asset_id = 6 
         """, (company_id,old_timestamp))
         result = cursor.fetchall()
@@ -924,14 +924,14 @@ def get_votes(company_id):
 
 
 def get_status_mod(company_id):
-    # Check which one is active ?
+    # Check which one is active %s
     conn = get_db()
     with conn:
         cursor = conn.cursor()
         cursor.execute(f"""
             SELECT ae.timestamp, ae.duration_s, e.severity, e.status_id FROM active_event ae
             JOIN event e ON e.id = ae.event_id
-            WHERE ae.affected_id = ?
+            WHERE ae.affected_id = %s
             ORDER BY ae.timestamp DESC
         """, (company_id,))
         result = cursor.fetchall()
@@ -1030,8 +1030,8 @@ def get_drink_mod(drink_id):
     with conn:
         cursor = conn.cursor()
         cursor.execute(f"""
-                SELECT * FROM ledger WHERE asset_id = ?
-                AND timestamp > ?
+                SELECT * FROM ledger WHERE asset_id = %s
+                AND timestamp > %s
                 ORDER BY timestamp DESC
             """, (drink_id,old_timestamp))
         result = cursor.fetchall()
@@ -1085,7 +1085,7 @@ def generate_drink_market():
         print(asset["asset_name"], asset_worth, new_worth)
         insert_market(asset["id"], round(new_worth))
 
-# This will be triggered every cycle ? I guess
+# This will be triggered every cycle %s I guess
 def calc_invention_payout():
     conn = get_db()
 
@@ -1175,7 +1175,7 @@ def check_status(invite_code):
             SELECT ae.timestamp, ae.duration_s, e.event_title, e.severity, e.status_id, c.id FROM active_event ae
             JOIN event e ON e.id = ae.event_id
             JOIN company c ON c.id = ae.affected_id
-            WHERE c.code = ?
+            WHERE c.code = %s
         """, (invite_code,))
         result = cursor.fetchall()
     formatted = format_sql_fetch(result)
@@ -1260,7 +1260,7 @@ def company_exists(invite_code):
     with conn:
         cursor = conn.cursor()
         cursor.execute(f"""
-            SELECT * FROM company WHERE code = ?
+            SELECT * FROM company WHERE code = %s
         """, (invite_code,))
         result = cursor.fetchall()
     if result:
@@ -1282,7 +1282,7 @@ def get_player_inbox(invite_code):
             JOIN company c ON c.id = l.sender_id
             JOIN company y ON y.id = l.recipient_id
             JOIN asset a ON a.id = l.asset_id
-            WHERE c.code = ? OR y.code = ?
+            WHERE c.code = %s OR y.code = %s
         """, (invite_code,invite_code))
         result = cursor.fetchall()
     formatted = format_sql_fetch(result)
