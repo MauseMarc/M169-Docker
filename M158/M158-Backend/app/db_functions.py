@@ -59,10 +59,8 @@ def get_volatility():
 # ==================================================================================================
 # Format a SQL Querie as a Dictionary
 def format_sql_fetch(sql_result):
-    list_of_logs = []
-    for row in sql_result:
-        list_of_logs.append(dict(row))
-    return list_of_logs
+    # If sql_result is None, return an empty list, otherwise it's already a list of dicts!
+    return list(sql_result) if sql_result else []
 
 # Gets the Timestamp. Pretty good naming
 def get_timestamp():
@@ -237,16 +235,16 @@ def get_company_balance(company_id):
         with conn.cursor() as cursor:
             cursor.execute("""
                            SELECT (COALESCE((SELECT SUM(amount) FROM ledger WHERE recipient_id = c.id), 0) -
-                                   COALESCE((SELECT SUM(amount) FROM ledger WHERE sender_id = c.id), 0))
+                                   COALESCE((SELECT SUM(amount) FROM ledger WHERE sender_id = c.id), 0)) AS balance
                            FROM company c
                            WHERE c.id = %s
                            """, (company_id,))
             result = cursor.fetchone()
 
-            # Safely check if a row was returned
+            # result looks like: {"balance": 500.00}
             if result:
-                return result[0]
-            return 0  # Default to 0 if the company doesn't exist
+                return result['balance']
+            return 0
     finally:
         conn.close()
 
